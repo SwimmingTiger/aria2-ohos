@@ -15,7 +15,11 @@ struct Index {
           .fontSize($r('app.float.page_text_font_size'))
           .fontWeight(FontWeight.Bold)
           .onClick(() => {
-            this.message = 'Welcome';
+            let projectPath = this.getUIContext().getHostContext()!.bundleCodeDir;
+            let soLibPath = `${projectPath}/libs/arm64/elftest.so`;
+
+            this.message = soLibPath;
+
             hilog.info(DOMAIN, 'testTag', 'Test NAPI 2 + 3 = %{public}d', testNapi.add(2, 3));
           })
       }
