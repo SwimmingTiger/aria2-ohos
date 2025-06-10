@@ -60,14 +60,6 @@ void aria2_run()
     }
 }
 
-void elftest_exec()
-{
-    // 用 exec 执行 /data/storage/el1/bundle/libs/arm64/elftest.so 文件
-    const char* path = "/data/storage/el1/bundle/libs/arm64/elftest.so";
-    execl(path, path);
-    perror("execl failed");
-}
-
 void aria2_init()
 {
     int pid = fork();
@@ -124,9 +116,6 @@ void aria2_init()
         _exit(1);
     }
     close(fd); // 关闭原始文件描述符，因为已经重定向到 stderr
-
-
-    elftest_exec();
 
 
     aria2_run();
