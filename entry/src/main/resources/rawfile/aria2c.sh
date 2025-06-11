@@ -80,10 +80,12 @@ dd_tail() {
         dd if="$1" bs=1 skip="$offset" 2>"$1.dd"
         outputBytes="$(cat "$1.dd" | tail -n1 | awk '{print $1}')"
         offset=$((offset + outputBytes))
+        sleep 0.1
     done
     if [ -f "$1.dd" ]; then
         rm "$1.dd"
     fi
+    sleep 0.1
     dd if="$1" bs=1 skip="$offset" 2>/dev/null
 }
 
