@@ -68,7 +68,12 @@ void aria2_load(const char* libDir)
     }
 }
 
-void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::string &exitCodeFile) {
+void handle_argv(
+    const std::string &arg,
+    std::vector<std::string> &argv,
+    std::string &exitCodeFile,
+    std::string &pidFile
+) {
     if (arg.starts_with("ENV\2\2")) {
         std::string envVar = arg.substr(5); // 跳过 "ENV\2\2"
         size_t pos = envVar.find('=');
@@ -90,21 +95,7 @@ void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::st
         }
     }
     else if (arg.starts_with("PID\2\2")) {
-        std::string pidFile = arg.substr(5); // 跳过 "PID\2\2"
-
-        // 把当前进程id写入pidFile
-        unlink(pidFile.c_str());
-        int fd = open(pidFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
-        if (fd <= 0) {
-            // 打开失败
-            perror("Failed to open pidFile");
-            return;
-        }
-        std::string pidStr = std::to_string(getpid()) + '\n';
-        if (write(fd, pidStr.c_str(), pidStr.size()) < 0) {
-            perror("Failed to write pid to pidFile");
-        }
-        close(fd); // 关闭文件描述符
+        pidFile = arg.substr(5); // 跳过 "PID\2\2"
     }
     else if (arg.starts_with("EXT\2\2")) { // EXiT 退出代码文件
         exitCodeFile = arg.substr(5); // 跳过 "EXT\2\2"
@@ -199,6 +190,7 @@ void aria2_run(const char* libDir, int jobFD)
 
     // 以 "\3\3\3\3" 分割 jobFileContent
     std::string exitCodeFile;
+    std::string pidFile;
     std::vector<std::string> argv;
     size_t pos = 0;
     size_t nextPos;
@@ -206,7 +198,7 @@ void aria2_run(const char* libDir, int jobFD)
     while ((nextPos = jobFileContent.find("\3\3\3\3", pos)) != std::string::npos) {
         std::string arg = jobFileContent.substr(pos, nextPos - pos);
         pos = nextPos + 4; // 跳过 "\3\3\3\3"
-        handle_argv(arg, argv, exitCodeFile);
+        handle_argv(arg, argv, exitCodeFile, pidFile);
     }
 
     // 把 argv 转换为 char** 数组
@@ -219,8 +211,36 @@ void aria2_run(const char* libDir, int jobFD)
     // 设置 openssl legacy.so 加载路径
     setenv("OPENSSL_MODULES", libDir, 1);
 
-    // 调用 aria2c 的 main 函数
-    int exitCode = g_aria2c_main(argc, (char**)argvArray);
+    int exitCode = 0;
+    int jobPid = fork();
+    if (jobPid == 0) {
+        // 调用 aria2c 的 main 函数
+        _exit(g_aria2c_main(argc, (char**)argvArray));
+    }
+    else if (jobPid < 0) {
+        // fork 失败
+        perror("Failed to fork job process");
+    }
+
+    {
+        // 把进程id写入pidFile
+        unlink(pidFile.c_str());
+        int fd = open(pidFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        if (fd <= 0) {
+            // 打开失败
+            perror("Failed to open pidFile");
+            return;
+        }
+        std::string pidStr = std::to_string(jobPid) + '\n';
+        if (write(fd, pidStr.c_str(), pidStr.size()) < 0) {
+            perror("Failed to write pid to pidFile");
+        }
+        close(fd); // 关闭文件描述符
+    }
+    
+    if (jobPid > 0) {
+        waitpid(jobPid, &exitCode, 0);
+    }
 
     // 把退出代码写到 exitCodeFile 文件
     if (!exitCodeFile.empty()) {
