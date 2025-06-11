@@ -256,7 +256,7 @@ void aria2_run(const char* libDir, int jobFD, std::string jobFile)
                 // 检查 killFlagFile 文件是否存在，如果存在则发送 SIGKILL 信号
                 int fd = open(killFlagFile.c_str(), O_RDONLY);
                 if (fd > 0) {
-                    kill(jobPid, SIGINT);
+                    kill(jobPid, SIGTERM);
                     close(fd);
                 }
             }
