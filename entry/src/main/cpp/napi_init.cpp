@@ -1,12 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include "napi/native_api.h"
+
+
+// aria2c.so 里的 main 函数
+int (*g_aria2c_main)(int argc, char** argv);
 
 
 void aria2_init();
@@ -42,22 +48,35 @@ static napi_value Add(napi_env env, napi_callback_info info)
 
 }
 
+void aria2_load()
+{
+    g_aria2c_main = nullptr;
+
+    // 设置 openssl legacy.so 加载路径
+    setenv("OPENSSL_MODULES", "/data/storage/el1/bundle/libs/arm64", 1);
+
+    void* handle = dlopen("aria2c.so", RTLD_LAZY);
+    if (!handle) {
+        fprintf(stderr, "Failed to load aria2c.so: %s\n", dlerror());
+        _exit(1);
+    }
+
+    g_aria2c_main = (int (*)(int, char**))dlsym(handle, "main");
+    if (!g_aria2c_main) {
+        fprintf(stderr, "Failed to find main function in aria2c.so: %s\n", dlerror());
+        dlclose(handle);
+        _exit(1);
+    }
+}
+
 void aria2_run()
 {
-    // 从 stdin 读取行，然后写入 stdout
-    char buffer[1024];
-    while (true) {
-        ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
-        if (bytes_read <= 0) {
-            break; // 读取失败或 EOF
-        }
-        buffer[bytes_read] = '\0'; // 确保字符串以 null 结尾
-
-        // 在这里可以处理读取到的命令
-        // 例如，调用 aria2c 命令行工具来处理下载任务
-        // 这里只是简单地将读取到的内容写入 stdout
-        write(STDOUT_FILENO, buffer, bytes_read);
-    }
+    int argc = 2;
+    const char* argv[] = {
+        "aria2c",
+        "--help",
+    };
+    g_aria2c_main(argc, (char**)argv);
 }
 
 void aria2_init()
@@ -118,6 +137,7 @@ void aria2_init()
     close(fd); // 关闭原始文件描述符，因为已经重定向到 stderr
 
 
+    aria2_load();
     aria2_run();
 
 
