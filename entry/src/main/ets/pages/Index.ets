@@ -56,9 +56,11 @@ source /dev/shm/aria2c
 
 aria2c --help
 
-aria2c https://hu60.cn/tpl/classic/img/hulvlin3.png
+aria2c --summary-interval=2 https://hu60.cn/tpl/classic/img/hulvlin3.png
 
-aria2c https://github.com/SwimmingTiger/aria2-ohos/archive/refs/heads/main.zip
+aria2c --summary-interval=2 https://github.com/SwimmingTiger/aria2-ohos/archive/refs/heads/main.zip
+
+   添加 --summary-interval=2 参数可以每2秒输出一次下载进度，如果不添加，60秒输出一次下载进度。
 
 3. 文件保存在哪里？
 
