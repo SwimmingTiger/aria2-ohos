@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/wait.h>
 
 #include <iostream>
 #include <fstream>
@@ -67,7 +68,14 @@ void aria2_load(const char* libDir)
     }
 }
 
-void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::string &exitCodeFile) {
+void handle_argv(
+    const std::string &arg,
+    std::vector<std::string> &argv,
+    std::string &exitCodeFile, 
+    std::string &pidFile,
+    std::string &stdOutFile,
+    std::string &stdErrFile
+) {
     if (arg.starts_with("ENV\2\2")) {
         std::string envVar = arg.substr(5); // 跳过 "ENV\2\2"
         size_t pos = envVar.find('=');
@@ -83,37 +91,23 @@ void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::st
         argv.push_back(arg.substr(5)); // 跳过 "ARG\2\2"
     }
     else if (arg.starts_with("PWD\2\2")) {
-        std::string pwd = arg.substr(5); // 跳过 "PWD\n\n"
+        std::string pwd = arg.substr(5); // 跳过 "PWD\2\2"
         if (chdir(pwd.c_str()) != 0) {
             perror("Failed to change directory");
         }
     }
     else if (arg.starts_with("PID\2\2")) {
-        std::string pidFile = arg.substr(5); // 跳过 "PID\2\2"
-
-        // 把当前进程id写入pidFile
-        unlink(pidFile.c_str());
-        int fd = open(pidFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
-        if (fd <= 0) {
-            // 打开失败
-            perror("Failed to open pidFile");
-            return;
-        }
-        std::string pidStr = std::to_string(getpid()) + '\n';
-        if (write(fd, pidStr.c_str(), pidStr.size()) < 0) {
-            perror("Failed to write pid to pidFile");
-        }
-        close(fd); // 关闭文件描述符
+        pidFile = arg.substr(5); // 跳过 "PID\2\2"
     }
     else if (arg.starts_with("EXT\2\2")) { // EXiT 退出代码文件
         exitCodeFile = arg.substr(5); // 跳过 "EXT\2\2"
     }
     else if (arg.starts_with("CIN\2\2")) {
         // 处理标准输入重定向
-        std::string inputFile = arg.substr(5); // 跳过 "CIN\2\2"
-        int fd = open(inputFile.c_str(), O_RDONLY);
+        std::string stdInFile = arg.substr(5); // 跳过 "CIN\2\2"
+        int fd = open(stdInFile.c_str(), O_RDONLY);
         if (fd < 0) {
-            perror("Failed to open input file");
+            perror("Failed to open stdInFile");
             return;
         }
         if (dup2(fd, STDIN_FILENO) < 0) {
@@ -125,11 +119,11 @@ void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::st
     }
     else if (arg.starts_with("OUT\2\2")) {
         // 处理标准输出重定向
-        std::string outputFile = arg.substr(5); // 跳过 "COUT\2\2"
-        unlink(outputFile.c_str());
-        int fd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        stdOutFile = arg.substr(5); // 跳过 "COUT\2\2"
+        unlink(stdOutFile.c_str());
+        int fd = open(stdOutFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (fd < 0) {
-            perror("Failed to open output file");
+            perror("Failed to open stdOutFile");
             return;
         }
         if (dup2(fd, STDOUT_FILENO) < 0) {
@@ -141,11 +135,11 @@ void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::st
     }
     else if (arg.starts_with("ERR\2\2")) {
         // 处理标准错误重定向
-        std::string errorFile = arg.substr(5); // 跳过 "ERR\2\2"
-        unlink(errorFile.c_str());
-        int fd = open(errorFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        stdErrFile = arg.substr(5); // 跳过 "ERR\2\2"
+        unlink(stdErrFile.c_str());
+        int fd = open(stdErrFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (fd < 0) {
-            perror("Failed to open error file");
+            perror("Failed to open stdOutFile");
             return;
         }
         if (dup2(fd, STDERR_FILENO) < 0) {
@@ -160,7 +154,7 @@ void handle_argv(const std::string &arg, std::vector<std::string> &argv, std::st
     }
 }
 
-void aria2_run(const char* libDir, int jobFD)
+void aria2_run(const char* libDir, int jobFD, std::string jobFile)
 {
     int pid = fork();
     if (pid > 0) {
@@ -198,6 +192,9 @@ void aria2_run(const char* libDir, int jobFD)
 
     // 以 "\3\3\3\3" 分割 jobFileContent
     std::string exitCodeFile;
+    std::string pidFile;
+    std::string stdOutFile;
+    std::string stdErrFile;
     std::vector<std::string> argv;
     size_t pos = 0;
     size_t nextPos;
@@ -205,7 +202,7 @@ void aria2_run(const char* libDir, int jobFD)
     while ((nextPos = jobFileContent.find("\3\3\3\3", pos)) != std::string::npos) {
         std::string arg = jobFileContent.substr(pos, nextPos - pos);
         pos = nextPos + 4; // 跳过 "\3\3\3\3"
-        handle_argv(arg, argv, exitCodeFile);
+        handle_argv(arg, argv, exitCodeFile, pidFile, stdOutFile, stdErrFile);
     }
 
     // 把 argv 转换为 char** 数组
@@ -214,12 +211,41 @@ void aria2_run(const char* libDir, int jobFD)
     for (int i = 0; i < argc; ++i) {
         argvArray[i] = argv[i].c_str();
     }
-
+    
     // 设置 openssl legacy.so 加载路径
     setenv("OPENSSL_MODULES", libDir, 1);
 
     // 调用 aria2c 的 main 函数
-    int exitCode = g_aria2c_main(argc, (char**)argvArray);
+    int jobPid = fork();
+    if (jobPid == 0) {
+        _exit(g_aria2c_main(argc, (char**)argvArray));
+    }
+    else if (jobPid < 0) {
+        // fork 失败
+        perror("fail to fork()");
+    }
+    
+    if (!pidFile.empty()) {
+        // 把进程id写入pidFile
+        unlink(pidFile.c_str());
+        int fd = open(pidFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        if (fd <= 0) {
+            // 打开失败
+            perror("Failed to open pidFile");
+            return;
+        }
+        std::string pidStr = std::to_string(getpid()) + '\n';
+        if (write(fd, pidStr.c_str(), pidStr.size()) < 0) {
+            perror("Failed to write pid to pidFile");
+        }
+        close(fd); // 关闭文件描述符
+    }
+    
+    // 等待子进程退出
+    int exitCode = -1;
+    if (jobPid > 0) {
+        waitpid(jobPid, &exitCode, 0);
+    }
 
     // 把退出代码写到 exitCodeFile 文件
     if (!exitCodeFile.empty()) {
@@ -228,14 +254,42 @@ void aria2_run(const char* libDir, int jobFD)
         if (fd <= 0) {
             // 打开失败
             perror("Failed to open exitCodeFile");
-            _exit(1);
         }
-        std::string exitCodeStr = std::to_string(exitCode) + '\n';
-        write(fd, exitCodeStr.c_str(), exitCodeStr.size());
-        close(fd); // 关闭文件描述符
+        else {
+            std::string exitCodeStr = std::to_string(exitCode) + '\n';
+            write(fd, exitCodeStr.c_str(), exitCodeStr.size());
+            close(fd); // 关闭文件描述符
+        }
     }
 
-    _exit(exitCode);
+    // 等待 jobFile 被删除
+    for (int i = 0; i < 60; ++i) {
+        if (access(jobFile.c_str(), F_OK) != 0) {
+            // jobFile 已经被删除
+            break;
+        }
+        sleep(1); // 等待1秒后继续检查
+    }
+
+    // 删除临时文件
+    if (!stdOutFile.empty()) {
+        unlink(stdOutFile.c_str());
+    }
+    if (!stdErrFile.empty()) {
+        unlink(stdErrFile.c_str());
+    }
+    if (!pidFile.empty()) {
+        unlink(pidFile.c_str());
+    }
+
+    // 等待 exitCodeFile 被读取
+    sleep(10);
+
+    if (!exitCodeFile.empty()) {
+        unlink(exitCodeFile.c_str());
+    }
+
+    _exit(0);
 }
 
 void next_job_index(uint64_t &jobIndex, std::string &jobFile, const std::string &jobIndexFile)
@@ -253,7 +307,8 @@ void next_job_index(uint64_t &jobIndex, std::string &jobFile, const std::string 
             sleep(1);
             continue;
         }
-        if (write(fd, jobFile.c_str(), jobFile.size()) < 0) {
+        std::string fileContent = jobFile + '\n';
+        if (write(fd, fileContent.c_str(), fileContent.size()) < 0) {
             perror("Failed to write jobIndexFile");
             close(fd); // 关闭文件描述符
             sleep(1);
@@ -279,7 +334,7 @@ void aria2_job_loop(const char* libDir)
         
         next_job_index(jobIndex, jobFile, jobIndexFile);
         
-        aria2_run(libDir, jobFD);
+        aria2_run(libDir, jobFD, jobFile);
 
         close(jobFD); // 关闭 jobFD 文件描述符
     }
