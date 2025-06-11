@@ -72,7 +72,9 @@ void handle_argv(
     const std::string &arg,
     std::vector<std::string> &argv,
     std::string &exitCodeFile,
-    std::string &pidFile
+    std::string &pidFile,
+    std::string &stdOutFile,
+    std::string &stdErrFile
 ) {
     if (arg.starts_with("ENV\2\2")) {
         std::string envVar = arg.substr(5); // 跳过 "ENV\2\2"
@@ -117,9 +119,9 @@ void handle_argv(
     }
     else if (arg.starts_with("OUT\2\2")) {
         // 处理标准输出重定向
-        std::string outputFile = arg.substr(5); // 跳过 "COUT\2\2"
-        unlink(outputFile.c_str());
-        int fd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        stdOutFile = arg.substr(5); // 跳过 "COUT\2\2"
+        unlink(stdOutFile.c_str());
+        int fd = open(stdOutFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (fd < 0) {
             perror("Failed to open output file");
             return;
@@ -133,9 +135,9 @@ void handle_argv(
     }
     else if (arg.starts_with("ERR\2\2")) {
         // 处理标准错误重定向
-        std::string errorFile = arg.substr(5); // 跳过 "ERR\2\2"
-        unlink(errorFile.c_str());
-        int fd = open(errorFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        stdErrFile = arg.substr(5); // 跳过 "ERR\2\2"
+        unlink(stdErrFile.c_str());
+        int fd = open(stdErrFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (fd < 0) {
             perror("Failed to open error file");
             return;
@@ -191,6 +193,8 @@ void aria2_run(const char* libDir, int jobFD)
     // 以 "\3\3\3\3" 分割 jobFileContent
     std::string exitCodeFile;
     std::string pidFile;
+    std::string stdOutFile;
+    std::string stdErrFile;
     std::vector<std::string> argv;
     size_t pos = 0;
     size_t nextPos;
@@ -198,7 +202,7 @@ void aria2_run(const char* libDir, int jobFD)
     while ((nextPos = jobFileContent.find("\3\3\3\3", pos)) != std::string::npos) {
         std::string arg = jobFileContent.substr(pos, nextPos - pos);
         pos = nextPos + 4; // 跳过 "\3\3\3\3"
-        handle_argv(arg, argv, exitCodeFile, pidFile);
+        handle_argv(arg, argv, exitCodeFile, pidFile, stdOutFile, stdErrFile);
     }
 
     // 把 argv 转换为 char** 数组
@@ -254,6 +258,21 @@ void aria2_run(const char* libDir, int jobFD)
         std::string exitCodeStr = std::to_string(exitCode) + '\n';
         write(fd, exitCodeStr.c_str(), exitCodeStr.size());
         close(fd); // 关闭文件描述符
+    }
+
+    // 30秒后清理临时文件
+    sleep(30);
+    if (!stdOutFile.empty()) {
+        unlink(stdOutFile.c_str());
+    }
+    if (!stdErrFile.empty()) {
+        unlink(stdErrFile.c_str());
+    }
+    if (!pidFile.empty()) {
+        unlink(pidFile.c_str());
+    }
+    if (!exitCodeFile.empty()) {
+        unlink(exitCodeFile.c_str());
     }
 
     _exit(exitCode);
