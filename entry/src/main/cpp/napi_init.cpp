@@ -380,9 +380,6 @@ static napi_value ets_aria2_init(napi_env env, napi_callback_info info)
 
     napi_get_cb_info(env, info, &argc, args , nullptr, nullptr);
 
-    napi_valuetype valuetype0;
-    napi_typeof(env, args[0], &valuetype0);
-
     char *libDir = (char*)malloc(PATH_MAX);
     napi_get_value_string_utf8(env, args[0], libDir, PATH_MAX, nullptr);
     
@@ -407,11 +404,44 @@ static napi_value ets_aria2_init(napi_env env, napi_callback_info info)
     return success;
 }
 
+static napi_value ets_write_file(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    napi_value args[2] = {nullptr};
+
+    napi_get_cb_info(env, info, &argc, args , nullptr, nullptr);
+
+    char *dest = (char*)malloc(PATH_MAX);
+    napi_get_value_string_utf8(env, args[0], dest, PATH_MAX, nullptr);
+
+    char *content = (char*)malloc(8192);
+    napi_get_value_string_utf8(env, args[1], content, 8192, nullptr);
+    
+    bool result = false;
+    unlink(dest);
+    int fd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd >= 0) {
+        size_t len = strlen(content);
+        if (write(fd, content, len) == len) {
+            result = true;
+        }
+        close(fd);
+    }
+    
+    free(dest);
+    free(content);
+    
+    napi_value success;
+    napi_get_boolean(env, result, &success);
+    return success;
+}
+
 EXTERN_C_START
 static napi_value Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-        { "aria2_init", nullptr, ets_aria2_init, nullptr, nullptr, nullptr, napi_default, nullptr }
+        { "aria2_init", nullptr, ets_aria2_init, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "write_file", nullptr, ets_write_file, nullptr, nullptr, nullptr, napi_default, nullptr }
     };
     napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
     return exports;

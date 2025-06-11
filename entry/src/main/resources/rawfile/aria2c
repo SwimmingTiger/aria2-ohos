@@ -1,0 +1,4 @@
+#!/bin/sh
+function aria2c() {
+    sh /dev/shm/aria2c.sh "$@"
+}
