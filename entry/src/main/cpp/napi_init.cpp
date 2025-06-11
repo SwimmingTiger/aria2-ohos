@@ -74,7 +74,8 @@ void handle_argv(
     std::string &exitCodeFile,
     std::string &pidFile,
     std::string &stdOutFile,
-    std::string &stdErrFile
+    std::string &stdErrFile,
+    std::string &killFlagFile
 ) {
     if (arg.starts_with("ENV\2\2")) {
         std::string envVar = arg.substr(5); // 跳过 "ENV\2\2"
@@ -101,6 +102,9 @@ void handle_argv(
     }
     else if (arg.starts_with("EXT\2\2")) { // EXiT 退出代码文件
         exitCodeFile = arg.substr(5); // 跳过 "EXT\2\2"
+    }
+    else if (arg.starts_with("KIL\2\2")) { // KILl flag file
+        killFlagFile = arg.substr(5); // 跳过 "KIL\2\2"
     }
     else if (arg.starts_with("CIN\2\2")) {
         // 处理标准输入重定向
@@ -154,7 +158,7 @@ void handle_argv(
     }
 }
 
-void aria2_run(const char* libDir, int jobFD)
+void aria2_run(const char* libDir, int jobFD, std::string jobFile)
 {
     int pid = fork();
     if (pid > 0) {
@@ -195,6 +199,7 @@ void aria2_run(const char* libDir, int jobFD)
     std::string pidFile;
     std::string stdOutFile;
     std::string stdErrFile;
+    std::string killFlagFile;
     std::vector<std::string> argv;
     size_t pos = 0;
     size_t nextPos;
@@ -202,7 +207,7 @@ void aria2_run(const char* libDir, int jobFD)
     while ((nextPos = jobFileContent.find("\3\3\3\3", pos)) != std::string::npos) {
         std::string arg = jobFileContent.substr(pos, nextPos - pos);
         pos = nextPos + 4; // 跳过 "\3\3\3\3"
-        handle_argv(arg, argv, exitCodeFile, pidFile, stdOutFile, stdErrFile);
+        handle_argv(arg, argv, exitCodeFile, pidFile, stdOutFile, stdErrFile, killFlagFile);
     }
 
     // 把 argv 转换为 char** 数组
@@ -243,7 +248,19 @@ void aria2_run(const char* libDir, int jobFD)
     }
     
     if (jobPid > 0) {
-        waitpid(jobPid, &exitCode, 0);
+        // 等待子进程结束
+        while (waitpid(jobPid, &exitCode, WNOHANG) != jobPid) {
+            usleep(100000); // 每100毫秒检查一次
+            
+            if (!killFlagFile.empty()) {
+                // 检查 killFlagFile 文件是否存在，如果存在则发送 SIGKILL 信号
+                int fd = open(killFlagFile.c_str(), O_RDONLY);
+                if (fd > 0) {
+                    kill(jobPid, SIGINT);
+                    close(fd);
+                }
+            }
+        }
     }
 
     // 把退出代码写到 exitCodeFile 文件
@@ -320,7 +337,7 @@ void aria2_job_loop(const char* libDir)
         
         next_job_index(jobIndex, jobFile, jobIndexFile);
         
-        aria2_run(libDir, jobFD);
+        aria2_run(libDir, jobFD, jobFile);
 
         close(jobFD); // 关闭 jobFD 文件描述符
     }

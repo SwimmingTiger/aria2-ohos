@@ -16,6 +16,7 @@ JOB_INDEX_FILE="/dev/shm/cn.hu60.aria2.job.index"
 
 PID_FILE="/dev/shm/cn.hu60.aria2.$$.pid"
 EXIT_CODE_FILE="/dev/shm/cn.hu60.aria2.$$.exitCode"
+KILL_FLAG_FILE="/dev/shm/cn.hu60.aria2.$$.killFlag"
 
 STDIN_FILE="/dev/shm/cn.hu60.aria2.$$.stdin"
 STDOUT_FILE="/dev/shm/cn.hu60.aria2.$$.stdout"
@@ -23,6 +24,8 @@ STDERR_FILE="/dev/shm/cn.hu60.aria2.$$.stderr"
 
 cat > "$STDIN_FILE" &
 STDIN_PID="$!"
+
+trap 'kill "$STDIN_PID" 2>/dev/null; rm "$STDIN_FILE"; touch "$KILL_FLAG_FILE"; sleep 1; rm "$KILL_FLAG_FILE" 2>/dev/null; exit 1' SIGINT SIGTERM
 
 read_line() {
     # 检查行尾是否为换行符
@@ -41,6 +44,7 @@ JOB_FILE="$(read_line "$JOB_INDEX_FILE")"
 
     echo -ne "PID\x02\x02$PID_FILE\x03\x03\x03\x03"
     echo -ne "EXT\x02\x02$EXIT_CODE_FILE\x03\x03\x03\x03"
+    echo -ne "KIL\x02\x02$KILL_FLAG_FILE\x03\x03\x03\x03"
 
     echo -ne "PWD\x02\x02$PWD\x03\x03\x03\x03"
 
@@ -59,12 +63,16 @@ JOB_FILE="$(read_line "$JOB_INDEX_FILE")"
     echo -ne "\x04\x04\x04\x04"
 } > "$JOB_FILE"
 
+trap 'kill "$STDIN_PID" 2>/dev/null; rm "$STDIN_FILE"; rm "$JOB_FILE"; touch "$KILL_FLAG_FILE"; sleep 1; rm "$KILL_FLAG_FILE" 2>/dev/null; exit 1' SIGINT SIGTERM
+
 # 等待进程启动
 while ! [ -f "$PID_FILE" ]; do
     sleep 0.1
 done
 
 JOB_PID="$(read_line "$PID_FILE")"
+
+trap 'kill "$JOB_PID" 2>/dev/null; kill "$STDIN_PID" 2>/dev/null; touch "$KILL_FLAG_FILE"; sleep 1; rm "$KILL_FLAG_FILE" 2>/dev/null' SIGINT SIGTERM
 
 dd_tail() {
     local offset=0
