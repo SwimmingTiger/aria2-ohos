@@ -1,1 +1,1 @@
-export const add: (a: number, b: number) => number;
+export const aria2_init: (libDir: string) => boolean;
