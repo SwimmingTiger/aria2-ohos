@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/wait.h>
 
 #include <iostream>
 #include <fstream>
@@ -188,7 +189,7 @@ void aria2_run(const char* libDir, int jobFD)
         if (jobFileContent.ends_with("\4\4\4\4")) {
             break; // 读取完成
         }
-        sleep(1); // 等待1秒后继续读取
+        usleep(100000); // 等待0.1秒后继续读取
     }
     close(jobFD); // 关闭 jobFD 文件描述符
     if (jobFileContent.empty()) {
@@ -250,14 +251,14 @@ void next_job_index(uint64_t &jobIndex, std::string &jobFile, const std::string 
         if (fd <= 0) {
             // 打开失败
             perror("Failed to open jobIndexFile");
-            sleep(1);
+            usleep(100000);
             continue;
         }
         std::string fileContent = jobFile + '\n';
         if (write(fd, fileContent.c_str(), fileContent.size()) < 0) {
             perror("Failed to write jobIndexFile");
             close(fd); // 关闭文件描述符
-            sleep(1);
+            usleep(100000);
             continue;
         }
         close(fd); // 关闭文件描述符
@@ -274,7 +275,7 @@ void aria2_job_loop(const char* libDir)
     for (;;) {
         int jobFD = open(jobFile.c_str(), O_RDONLY);
         if (jobFD <= 0) {
-            sleep(1);
+            usleep(100000);
             continue;
         }
         
