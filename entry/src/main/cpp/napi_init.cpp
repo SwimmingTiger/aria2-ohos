@@ -414,8 +414,9 @@ static napi_value ets_write_file(napi_env env, napi_callback_info info)
     char *dest = (char*)malloc(PATH_MAX);
     napi_get_value_string_utf8(env, args[0], dest, PATH_MAX, nullptr);
 
-    char *content = (char*)malloc(8192);
-    napi_get_value_string_utf8(env, args[1], content, 8192, nullptr);
+    int maxSize = 1024 * 1024; // 1MB
+    char *content = (char*)malloc(maxSize);
+    napi_get_value_string_utf8(env, args[1], content, maxSize, nullptr);
     
     bool result = false;
     unlink(dest);

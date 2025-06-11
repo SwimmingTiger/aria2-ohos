@@ -78,6 +78,7 @@ cat /dev/shm/cn.hu60.aria2.stdout
         // 复制脚本文件
         this.copyRawFile('aria2c.sh', '/dev/shm/aria2c.sh');
         this.copyRawFile('aria2c', '/dev/shm/aria2c');
+        this.copyRawFile('aria2.ca.crt', '/dev/shm/aria2.ca.crt');
 
         // 启动 aria2c 进程
         let ret = napi.aria2_init(this.getNativeLibPath());

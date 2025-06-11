@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# CA证书路径
+export SSL_CERT_FILE="/dev/shm/aria2.ca.crt"
+
 JOB_INDEX_FILE="/dev/shm/cn.hu60.aria2.job.index"
 
 PID_FILE="/dev/shm/cn.hu60.aria2.$$.pid"
