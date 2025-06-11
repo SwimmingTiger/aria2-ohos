@@ -3,6 +3,15 @@
 # CA证书路径
 export SSL_CERT_FILE="/dev/shm/aria2.ca.crt"
 
+# 创建下载文件夹
+DOWNLOAD_DIR="$HOME/Download/cn.hu60.aria2"
+mkdir -p "$DOWNLOAD_DIR"
+
+# 如果 $PWD 不在下载文件夹内，就跳转到下载文件夹
+if ! echo "$PWD/" | grep -q "^$DOWNLOAD_DIR/"; then
+    cd "$DOWNLOAD_DIR"
+fi
+
 JOB_INDEX_FILE="/dev/shm/cn.hu60.aria2.job.index"
 
 PID_FILE="/dev/shm/cn.hu60.aria2.$$.pid"

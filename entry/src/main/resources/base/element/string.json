@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "Aria2"
+    },
+    {
+      "name": "permission_directory_reason",
+      "value": "根据用户输入的命令，下载文件到“下载”目录，或从“下载”目录上传文件到服务器。"
     }
   ]
 }
