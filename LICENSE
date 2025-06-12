@@ -47,3 +47,20 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <https://unlicense.org/>
+
+--------------------
+
+GPL infection problem of Aria2 code
+
+If you package this project directly as a HarmonyOS application, the entire 
+project will be infected by the entry/libs/arm64-v8a/libaria2.so file and 
+become a GPLv2 licensed project.
+
+However, if you delete all binaries in entry/libs folder, the rest of
+the project can be used as public domain code.
+
+Source code for entry/libs/arm64-v8a/libaria2.so:
+    https://github.com/SwimmingTiger/aria2
+
+Original license for entry/libs/arm64-v8a/libaria2.so:
+    https://github.com/SwimmingTiger/aria2/blob/1.37.0-ohos/COPYING
