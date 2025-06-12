@@ -1,0 +1,49 @@
+著作权放弃声明
+
+本项目旨在成为鸿蒙终端应用的参考模板（在华为推出更好的方案之前），所以我在此声明，
+在法律允许的最大范围内，放弃该版本库内所有由我编写的代码的全部著作权，将其置入
+公有领域，所有人皆可自由使用。
+
+                                                           老虎会游泳
+                                                          2025年6月12日
+
+--------------------
+
+Aria2代码的GPL感染问题
+
+如果你将本项目直接打包为鸿蒙应用，则整个项目受到 entry/libs/arm64-v8a/libaria2.so
+文件的感染成为 GPLv2 许可项目。但只要删除 entry/libs 里的所有二进制，项目的其余部分
+就可以作为公有领域代码使用。
+
+entry/libs/arm64-v8a/libaria2.so 对应的源代码：
+    https://github.com/SwimmingTiger/aria2
+
+其原始许可证：
+    https://github.com/SwimmingTiger/aria2/blob/1.37.0-ohos/COPYING
+
+--------------------
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <https://unlicense.org/>
