@@ -60,3 +60,7 @@
   * https://github.com/SwimmingTiger/aria2-ohos
   
   * https://github.com/SwimmingTiger/aria2
+
+### 开发文档
+
+* [鸿蒙 PC /dev/shm 共享内存文件系统的特点](docs/dev-shm.md)
