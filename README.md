@@ -8,7 +8,7 @@
 
    首次安装需要打开开发者模式，借助Windows虚拟机（也可以用另一台电脑，或者安卓手机、鸿蒙手机）把小白调试助手鸿蒙版安装到鸿蒙PC上。后续双击hap即可用鸿蒙版小白调试助手进行安装。
 
-   Windows虚拟机方案参考视频：[https://www.bilibili.com/video/BV1ZETBzuEjD/](https://www.bilibili.com/video/BV1ZETBzuEjD/)
+   Windows虚拟机安装小白调试助手教程：[https://www.bilibili.com/video/BV1ZETBzuEjD/](https://www.bilibili.com/video/BV1ZETBzuEjD/)
 
 2. 打开 Aria2 应用，不要关闭其窗口。打开终端，输入以下命令，把 aria2c 命令加载到终端：
 
