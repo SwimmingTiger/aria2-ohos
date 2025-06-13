@@ -1,10 +1,10 @@
 ## 鸿蒙PC上的命令行版 Aria2（aria2c）
 
-![screenshot_20250612_055152](https://github.com/user-attachments/assets/07360639-1359-437f-bd76-39019abd3daf)
+![screenshot_20250612_055152](docs/img/screenshot.jpg)
 
 ### 使用方法：
 
-0. 去[Release页面](https://github.com/SwimmingTiger/aria2-ohos/releases)下载`cn.hu60.aria2-vx.x.x.hap`安装包，并用[小白调试助手](https://github.com/likuai2010/auto-installer/releases)安装。
+0. 去Release页面（[Gitee](https://gitee.com/SwimmingTiger/aria2-ohos/releases)|[Github](https://github.com/SwimmingTiger/aria2-ohos/releases)）下载`cn.hu60.aria2-vx.x.x.hap`安装包，并用[小白调试助手](https://github.com/likuai2010/auto-installer/releases)安装。
 
    首次安装需要打开开发者模式，借助Windows虚拟机（也可以用另一台电脑，或者安卓手机、鸿蒙手机）把小白调试助手鸿蒙版安装到鸿蒙PC上。后续双击hap即可用鸿蒙版小白调试助手进行安装。
 
