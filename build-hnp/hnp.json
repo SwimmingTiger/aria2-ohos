@@ -1,0 +1,7 @@
+{
+	"type":	"hnp-config",
+	"name":	"base",
+	"version":	"1.0",
+	"install":	{
+	}
+}

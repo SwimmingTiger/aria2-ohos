@@ -1,0 +1,11 @@
+#!/data/app/bin/bash
+# disable echo
+busybox stty -echo
+# ask for clipboard contents on stderr for pbpaste | ...
+printf "\033]52;c;?\007" 1>&2
+# wait for response
+read -t 1 -r -d "\\" response
+IFS=';' read -ra parts <<< "$response"
+# strip \033\\ and extract base64
+echo "${parts[2]::-1}" | base64 -d
+busybox stty echo

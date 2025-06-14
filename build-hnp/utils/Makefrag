@@ -1,0 +1,16 @@
+# use tic etc from homebrew
+export PATH := /opt/homebrew/opt/ncurses/bin/:/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/make/libexec/gnubin:$(PATH)
+# avoid sed error
+export LC_TYPE := C
+# avoid probing unwanted packages
+export PKG_CONFIG := /usr/bin/false
+# set toolchain paths
+export CC := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/aarch64-unknown-linux-ohos-clang
+export CXX := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/aarch64-unknown-linux-ohos-clang++
+export LD := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/ld.lld
+export AR := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/llvm-ar
+export RANLIB := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/llvm-ranlib
+export STRIP := $(TOOL_HOME)/sdk/default/openharmony/native/llvm/bin/llvm-strip
+export CFLAGS := -I$(shell pwd)/../sysroot/include -Wno-int-conversion
+export CXXFLAGS := -I$(shell pwd)/../sysroot/include
+export LDFLAGS := -L$(shell pwd)/../sysroot/lib
