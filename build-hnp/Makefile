@@ -11,7 +11,6 @@ copy: base.hnp
 	rm -f ../entry/hnp/arm64-v8a/*.hnp
 	mkdir -p ../entry/hnp/arm64-v8a
 	cp $^ ../entry/hnp/arm64-v8a
-	cp $^ ../entry/hnp/arm64-v8a/base-public.hnp
 
 base.hnp: $(STAMP) utils/pbcopy utils/pbpaste
 	# reduce size
