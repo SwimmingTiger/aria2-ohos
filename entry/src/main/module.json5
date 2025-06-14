@@ -48,7 +48,7 @@
     ],
     "hnpPackages": [
       {
-        "package": "base.hnp",
+        "package": "cn-hu60-aria2.hnp",
         "type": "public"
       }
     ]

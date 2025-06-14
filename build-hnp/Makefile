@@ -7,12 +7,12 @@ STAMP=$(patsubst %,%/.stamp,$(PKGS))
 
 all: copy
 
-copy: base.hnp
+copy: cn-hu60-aria2.hnp
 	rm -f ../entry/hnp/arm64-v8a/*.hnp
 	mkdir -p ../entry/hnp/arm64-v8a
 	cp $^ ../entry/hnp/arm64-v8a
 
-base.hnp: $(STAMP) utils/pbcopy utils/pbpaste
+cn-hu60-aria2.hnp: $(STAMP) utils/pbcopy utils/pbpaste
 	# reduce size
 	rm -rfv sysroot/share/man
 	rm -rfv sysroot/share/doc
@@ -30,8 +30,8 @@ base.hnp: $(STAMP) utils/pbcopy utils/pbpaste
 	cp $(TOOL_HOME)/sdk/default/openharmony/native/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos/libclang_rt.builtins.a sysroot/aarch64-unknown-linux-musl/lib/libgcc.a
 	# $(TOOL_HOME)/sdk/default/openharmony/toolchains/hnpcli pack -i sysroot -n base -v 1.0
 	cp hnp.json sysroot
-	rm -f base.hnp
-	zip -r base.hnp sysroot
+	rm -f cn-hu60-aria2.hnp
+	zip -r cn-hu60-aria2.hnp sysroot
 
 %/.stamp: %/Makefile
 	make -C $(patsubst %/.stamp,%,$@)
