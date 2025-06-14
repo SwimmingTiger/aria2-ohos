@@ -12,14 +12,19 @@ copy: cn-hu60-aria2.hnp
 	mkdir -p ../entry/hnp/arm64-v8a
 	cp $^ ../entry/hnp/arm64-v8a
 
-cn-hu60-aria2.hnp: $(STAMP) utils/pbcopy utils/pbpaste
+cn-hu60-aria2.hnp: $(STAMP)
 	# reduce size
 	rm -rfv sysroot/share/man
 	rm -rfv sysroot/share/doc
 	rm -rfv sysroot/share/info
-	# add pasteboard utilities
-	cp utils/pbcopy sysroot/bin
-	cp utils/pbpaste sysroot/bin
+	rm -rfv sysroot/include
+	rm -rfv sysroot/lib/cmake
+	rm -rfv sysroot/lib/pkgconfig
+	rm -rfv sysroot/bin/adig
+	rm -rfv sysroot/bin/ahost
+	rm -rfv sysroot/bin/c_rehash
+	rm -rfv sysroot/bin/openssl
+	rm -rfv sysroot/bin/xmlwf
 	# let gcc work out of box
 	mkdir -p sysroot/aarch64-unknown-linux-musl/lib
 	cp $(TOOL_HOME)/sdk/default/openharmony/native/sysroot/usr/lib/aarch64-linux-ohos/crt1.o sysroot/aarch64-unknown-linux-musl/lib/crt1.o

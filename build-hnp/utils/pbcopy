@@ -1,5 +1,0 @@
-#!/data/app/bin/bash
-# copy data to pasteboard using OSC52
-encoded=$(base64 -w 0)
-# strip extra newline and send
-printf "\033]52;c;%s\007" "${encoded}"
