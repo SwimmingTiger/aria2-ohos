@@ -31,6 +31,21 @@
 
    添加 --summary-interval=2 参数可以每2秒输出一次下载进度，如果不添加，60秒输出一次下载进度。
 
+4. 使用基于网页的 AriaNG 图形界面进行下载任务管理：
+
+   在终端执行以下命令打开RPC：
+
+   ```
+   source /dev/shm/aria2c
+   aria2c --enable-rpc --rpc-listen-all --rpc-allow-origin-all
+   ```
+
+   然后访问以下网站进行使用：
+
+   https://ariang.hu60.cn/#!/settings/rpc/set/http/127.0.0.1/6800/jsonrpc
+
+   ![image](docs/img/ariang.png)
+
 4. 文件保存在哪里？
 
    因为鸿蒙权限问题，文件只能保存在“下载/Aria2”文件夹内，其他文件夹没有写入权限。
