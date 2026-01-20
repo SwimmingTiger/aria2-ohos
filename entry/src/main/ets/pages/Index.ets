@@ -36,7 +36,15 @@ aria2c https://hu60.cn/tpl/classic/img/hulvlin3.png
   多线程下载：
 aria2c -x5 -s5 https://official-package.wpscdn.cn/wps/download/WPS_Setup_21541.exe
 
-3. 文件保存在哪里？
+3. 使用基于网页的 AriaNG 图形界面进行下载任务管理：
+
+  首先在终端执行以下命令打开RPC：
+aria2c --enable-rpc --rpc-listen-all --rpc-allow-origin-all
+
+  然后访问以下网站进行使用：
+https://ariang.hu60.cn/#!/settings/rpc/set/http/127.0.0.1/6800/jsonrpc
+
+4. 文件保存在哪里？
    文件默认保存在终端的当前目录，默认为“存储>个人”文件夹。
    如果想要保存在其他位置，请先执行以下命令跳转到对应的目录，然后再执行 aria2c 命令：
 
@@ -47,16 +55,16 @@ cd 目录名
 cd Download
 aria2c -x5 -s5 https://official-package.wpscdn.cn/wps/download/WPS_Setup_21541.exe
 
-4. 如何取消任务？
+5. 如何取消任务？
    同时按 Ctrl 和 C 键可以取消任务。如果没反应，就再按一下回车键。
 
-5. 技术细节：
+6. 技术细节：
    你可以在以下位置找到本应用添加到终端的命令文件：
 
 ls /data/service/hnp
 find /data/service/hnp/cn-hu60-aria2.org
 
-6. 更新日志
+7. 更新日志
 
 【v1.0.1】
     1. 改用 hnp 打包，不需要执行 source /dev/shm/aria2c 命令就可直接调用 aria2c 命令。
@@ -65,7 +73,7 @@ find /data/service/hnp/cn-hu60-aria2.org
     4. 1.0 版本中由于输入输出重定向导致的下载进度无法及时更新的问题也得到解决。
     感谢 Jiajie Chen 的 Termony 项目 <https://github.com/jiegec/Termony> 提供了 hnp 打包方法。
 
-7. 项目源代码：
+8. 项目源代码：
 https://gitee.com/SwimmingTiger/aria2-ohos
 https://github.com/SwimmingTiger/aria2-ohos
 `
