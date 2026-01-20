@@ -73,11 +73,16 @@ find /data/service/hnp/cn-hu60-aria2.org
 
 7. 更新日志
 
-【v1.0.1】
+    【v1.0.1】
+
     1. 改用 hnp 打包，不需要执行 source /dev/shm/aria2c 命令就可直接调用 aria2c 命令。
+
     2. 关闭本应用窗口后依然可以正常调用 aria2c 命令。
+    
     3. 由于终端可以直接执行原始 aria2c 命令，1.0 版本的文件权限问题不再存在，现在文件可保存至所有终端可以 cd 进入的文件夹。
+    
     4. 1.0 版本中由于输入输出重定向导致的下载进度无法及时更新的问题也得到解决。
+    
     感谢 Jiajie Chen 的 Termony 项目 <https://github.com/jiegec/Termony> 提供了 hnp 打包方法。
 
 8. 项目源代码：
