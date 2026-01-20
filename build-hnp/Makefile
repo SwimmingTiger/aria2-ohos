@@ -25,14 +25,6 @@ cn-hu60-aria2.hnp: $(STAMP)
 	rm -rfv sysroot/bin/c_rehash
 	rm -rfv sysroot/bin/openssl
 	rm -rfv sysroot/bin/xmlwf
-	# let gcc work out of box
-	mkdir -p sysroot/aarch64-unknown-linux-musl/lib
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/sysroot/usr/lib/aarch64-linux-ohos/crt1.o sysroot/aarch64-unknown-linux-musl/lib/crt1.o
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/sysroot/usr/lib/aarch64-linux-ohos/crti.o sysroot/aarch64-unknown-linux-musl/lib/crti.o
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/sysroot/usr/lib/aarch64-linux-ohos/crtn.o sysroot/aarch64-unknown-linux-musl/lib/crtn.o
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos/clang_rt.crtbegin.o sysroot/aarch64-unknown-linux-musl/lib/crtbegin.o
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos/clang_rt.crtend.o sysroot/aarch64-unknown-linux-musl/lib/crtend.o
-	cp $(TOOL_HOME)/sdk/default/openharmony/native/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos/libclang_rt.builtins.a sysroot/aarch64-unknown-linux-musl/lib/libgcc.a
 	# $(TOOL_HOME)/sdk/default/openharmony/toolchains/hnpcli pack -i sysroot -n base -v 1.0
 	cp hnp.json sysroot
 	rm -f cn-hu60-aria2.hnp
