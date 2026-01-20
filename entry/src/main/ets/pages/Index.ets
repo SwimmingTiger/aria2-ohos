@@ -39,7 +39,7 @@ aria2c -x5 -s5 https://official-package.wpscdn.cn/wps/download/WPS_Setup_21541.e
 3. 使用基于网页的 AriaNG 图形界面进行下载任务管理：
 
   首先在终端执行以下命令打开RPC：
-aria2c --enable-rpc --rpc-listen-all --rpc-allow-origin-all
+aria2c -x5 -s5 --enable-rpc --rpc-listen-all --rpc-allow-origin-all
 
   然后访问以下网站进行使用：
 https://ariang.hu60.cn/#!/settings/rpc/set/http/127.0.0.1/6800/jsonrpc
