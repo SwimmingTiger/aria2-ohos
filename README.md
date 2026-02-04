@@ -4,13 +4,9 @@
 
 ### 安装方法：
 
-请用小白调试助手Windows版进行安装，安卓版和鸿蒙版无法给含有hnp的hap签名。
+请用小白调试助手2.5或更高版本进行安装，2.4及之前的版本无法给含有hnp命令行组件的hap包签名。
 
 小白调试助手下载地址：https://github.com/likuai2010/auto-installer/releases
-
-升级到鸿蒙6之后可以在Windows虚拟机内运行小白调试助手（鸿蒙5不行），如果遇到“系统找不到指定的文件”报错，请安装Windows ARM64版JDK。
-
-Windows ARM64 JDK下载地址：https://learn.microsoft.com/zh-cn/java/openjdk/download
 
 ### 使用方法：
 
